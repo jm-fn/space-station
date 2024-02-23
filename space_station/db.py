@@ -27,7 +27,6 @@ db_host = db_host_k8s or db_env_host
 if db_password_file:
     with open(db_password_file, "r") as f:
         db_password = f.readline().rstrip()
-        print(f"FROM FILE: {db_password}...")
 else:
     db_password = os.environ.get("DB_PASSWORD", "test_password")
 
@@ -41,8 +40,6 @@ ASession = async_sessionmaker(engine)
 
 
 async def db_init():
-    # Heh, this is reeeally bad security...
-    logger.info("Connecting to database at %s", database_url)
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
