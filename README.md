@@ -30,3 +30,8 @@ curl --request POST ${server_host}:${server_port}/kosmonauts/delete/${ID}
 where `server_host` is the address of the space_station server (e.g. localhost) and `server_port` is the port exposed by space_station (e.g. 8000).
 
 The content of the post should conform to the json schema listed in [this section](#json-schema).
+
+To do bulk upload of some cosmonauts, you can use the script:
+```
+./rabbit_sender.py -d ${rabbitmq_host} -p ${rabbitmq_port} -n ${number_of_kosmonauts}
+```
