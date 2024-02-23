@@ -15,16 +15,21 @@ from space_station.models import (
 
 logger = logging.getLogger(__name__)
 
-db_host = os.environ.get("DB_HOST", "localhost")
 db_password_file = os.environ.get("DB_PASSWORD_FILE", None)
+db_user = os.environ.get("DB_USER", "station")
+db_port = os.environ.get("DB_PORT", 5432)
+
+# get host - if there is a k8s defined env var, use it.
+db_env_host = os.environ.get("DB_HOST", "localhost")
+db_host_k8s = os.environ.get("SPACE_STATION_POSTGRES_SERVICE_HOST", None)
+db_host = db_host_k8s or db_env_host
+
 if db_password_file:
     with open(db_password_file, "r") as f:
         db_password = f.readline().rstrip()
         print(f"FROM FILE: {db_password}...")
 else:
     db_password = os.environ.get("DB_PASSWORD", "test_password")
-db_user = os.environ.get("DB_USER", "station")
-db_port = os.environ.get("DB_PORT", 5432)
 
 database_url = (
     f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/station"

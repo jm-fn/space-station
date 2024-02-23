@@ -12,10 +12,14 @@ from space_station.models import Kosmonaut
 from space_station import db
 
 
-rabbitmq_host = os.environ.get("RABBITMQ_HOST", "localhost")
 rabbitmq_password = os.environ.get("RABBITMQ_PASSWORD", "guest")
 rabbitmq_user = os.environ.get("RABBITMQ_USER", "guest")
 rabbitmq_port = os.environ.get("RABBITMQ_PORT", 5672)
+
+# get host - if there is a k8s defined env var, use it.
+rabbitmq_env_host = os.environ.get("RABBITMQ_HOST", "localhost")
+rabbitmq_k8s_host = os.environ.get("SPACE_STATION_RABBITMQ_SERVICE_HOST", None)
+rabbitmq_host = rabbitmq_k8s_host or rabbitmq_env_host
 
 rabbitmq_url = (
     f"amqp://{rabbitmq_user}:{rabbitmq_password}@{rabbitmq_host}:{rabbitmq_port}/"
