@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: space-station-app
+  labels:
+    app: space-station-app
+spec:
+  type: NodePort
+  ports:
+  - port: 8000
+    name: space-station-app
+    targetPort: 8000
+    nodePort: 30800
+  selector:
+    app: space-station-app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: space-station-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: space-station-app
+  template:
+    metadata:
+      labels:
+        app: space-station-app
+    spec:
+      volumes:
+      - name: db-password-volume
+        secret:
+          secretName: db-password
+      containers:
+      - name: space-station-app-container
+        image: ghcr.io/jm-fn/space-station:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: db-password-volume
+          readOnly: true
+          mountPath: "/run/secrets/db-password"
+        env:
+          - name: DB_PASSWORD_FILE
+            value: "/run/secrets/db-password/password"
+          - name: DB_USER
+            value: "station"
+
+

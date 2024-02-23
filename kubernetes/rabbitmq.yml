@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: space-station-rabbitmq
+  labels:
+    app: space-station-rabbitmq
+spec:
+  type: NodePort
+  ports:
+  - port: 5672
+    name: space-station-rabbitmq
+    targetPort: 5672
+    nodePort: 32765
+  selector:
+    app: space-station-rabbitmq
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: space-station-rabbitmq-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: space-station-rabbitmq
+  template:
+    metadata:
+      labels:
+        app: space-station-rabbitmq
+    spec:
+      containers:
+      - name: space-station-rabbitmq-container
+        image: rabbitmq:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5672
+

@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: space-station-postgres
+  labels:
+    app: space-station-postgres
+spec:
+  type: NodePort
+  ports:
+  - port: 5432
+    name: space-station-postgres
+    targetPort: 5432
+    nodePort: 32345
+  selector:
+    app: space-station-postgres
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: space-station-postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: space-station-postgres
+  template:
+    metadata:
+      labels:
+        app: space-station-postgres
+    spec:
+      volumes:
+      - name: db-password-volume
+        secret:
+          secretName: db-password
+      containers:
+      - name: space-station-postgres-container
+        image: postgres:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5432
+          #command: ["sleep", "3600"]
+        volumeMounts:
+        - name: db-password-volume
+          readOnly: true
+          mountPath: "/run/secrets/db-password"
+        env:
+          - name: POSTGRES_PASSWORD_FILE
+            value: "/run/secrets/db-password/password"
+          - name: POSTGRES_USER
+            value: "station"
+

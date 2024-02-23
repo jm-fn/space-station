@@ -14,6 +14,15 @@ podman-compose build && docker-compose up -d
 ```
 The docker-compose has been tested with `podman-compose` but it should work with docker-compose as well.
 
+### K8s cluster
+To run the space station on your favourite k8s cluster first create a secret with the database password. Modify the file `kubernetes/secret.yml` and run:
+```
+kubectl apply -f kubernetes/secret.yml
+```
+then apply the yaml files with configurations for postgres, rabbitmq and the space_station app:
+```
+kubectl apply -f kubernetes/postgres.yml -f kubernetes/rabbitmq.yml -f kubernetes/app.yml
+```
 
 ## Usage
 To manipulate cosmonauts manually run curl:
