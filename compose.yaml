@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: "postgres:latest"
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_USER: station
+    restart: always
+    ports:
+      5432:5432
+    secrets:
+      - db_password
+
+  rabbit:
+    # TODO: configure this somehow...
+    image: "rabbitmq:latest"
+    ports:
+      5672:5672
+    restart: always
+
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile-app
+    ports:
+      8000:8000
+    environment:
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      DB_HOST: postgres
+      RABBITMQ_HOST: rabbit
+    depends_on:
+      - rabbit
+      - postgres
+    restart: always
+    secrets:
+      - db_password
+    links:
+      - "postgres:postgres"
+      - "rabbit:rabbit"
+
+secrets:
+  db_password:
+    external: true
