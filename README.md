@@ -43,7 +43,7 @@ where `server_host` is the address of the space_station server (e.g. localhost)
 and `server_port` is the port exposed by space_station (e.g. 8000).
 
 The content of the post should conform to the json schema listed in
-[thissection](#json-schema).
+[this section](#json-schema).
 
 To do bulk upload of some cosmonauts, you can use the script:
 ```
@@ -53,3 +53,23 @@ To do bulk upload of some cosmonauts, you can use the script:
 ## Performance
 On my local RaspberryPi 4 HPC cluster the server is able to ingest 5000
 messages in 43s (~8.6s/1000msgs).
+
+## JSON Schema
+The json containing kosmonaut should conform to this schema:
+```
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "age": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "name",
+  ]
+}
+```
