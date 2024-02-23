@@ -1,0 +1,27 @@
+[project]
+name = "space_station"
+authors = [{name="jm-fn"}]
+version = "0.0.1"
+readme = "README.md"
+requires-python = ">=3.7"
+
+dependencies = [
+  "sqlmodel",
+  "asyncpg",
+  "fastapi",
+  "uvicorn[standard]",
+  "aio-pika",
+]
+
+[project.optional-dependencies]
+dev = [
+  "python-lsp-server",
+  "mypy",
+  "ruff",
+  "autoimport",
+  "pika",
+  "pandas",
+]
+
+[tool.setuptools.packages.find]
+include = ["space_station"]
