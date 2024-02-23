@@ -1,0 +1,10 @@
+FROM python:3
+
+WORKDIR /usr/src/app
+
+COPY ./pyproject.toml .
+COPY ./space_station ./space_station
+
+RUN pip install .
+
+CMD uvicorn space_station.main:app --host 0.0.0.0
