@@ -3,7 +3,7 @@ from typing import Sequence
 import logging
 
 from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.sql.expression import select
+from sqlalchemy.sql.expression import select, insert
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlmodel import SQLModel
@@ -36,7 +36,7 @@ database_url = (
 
 engine = create_async_engine(database_url, echo=False, max_overflow=0, pool_size=100)
 
-ASession = async_sessionmaker(engine)
+ASession = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def db_init():
@@ -93,6 +93,45 @@ async def create_kosmonaut(
     await db.commit()
     await db.refresh(kosmo)
     return (True, kosmo)
+
+
+async def bulk_create_kosmonaut(
+    db: AsyncSession, kosmonauts: list[Kosmonaut]
+) -> list[tuple[bool, Kosmonaut]]:
+    """
+    Returns a list of tuples (created: bool, kosmonaut: Kosmonaut)
+    - *created*:  false if there is already kosmonaut by the same name in the database
+              and no new kosmonaut is added
+    - *kosmonaut*: the instance of kosmonaut in database
+
+    """
+    result = []
+    kosmo_names = [x.name for x in kosmonauts]
+
+    # if kosmonaut by same name is in db already, we don't create new one
+    already_created_query = await db.scalars(
+        select(Kosmonaut).where(Kosmonaut.name.in_(kosmo_names))
+    )
+    already_created = already_created_query.all()
+    result = [(False, item) for item in already_created]
+    created_names = [item.name for item in already_created]
+
+    to_create = [
+        item.model_dump() for item in kosmonauts if item.name not in created_names
+    ]
+
+    if to_create:
+        newly_created = await db.scalars(
+            insert(Kosmonaut).returning(Kosmonaut), to_create
+        )
+        result.extend([(True, item) for item in newly_created.all()])
+        await db.commit()
+
+        # refresh after commiting
+        for _, item in result:
+            await db.refresh(item)
+
+    return result
 
 
 async def update_kosmonaut_age(
